@@ -330,7 +330,8 @@ footer{background:var(--bg2)}
 ├── <span class="f">README.md</span>        <span class="c"># how a stranger uses it</span>
 ├── reference/
 │   ├── input-template.md         <span class="c"># the paste format</span>
-│   └── cancellation-templates.md <span class="c"># drafted emails + report format</span>
+│   ├── cancellation-templates.md <span class="c"># drafted emails + report format</span>
+│   └── report-schema.md          <span class="c"># JSON output contract for this page's live mode</span>
 └── interface/       <span class="c"># this page - zero decision logic inside</span></pre>
 <p class="archnote">The rules short-circuit: assumptions and price normalization first, then the protected list, renewal urgency, usage, overlap, escalation, price-creep. First rule that fires decides, and every output cites its rule number.</p>
 <p class="archnote">Nothing is a black box. Edit one line in <b>rules.md</b> and every interface - any AI chat, this page, the local app - changes behavior instantly, because they all read the same files. Decision logic you can read, diff, and trust.</p>
@@ -498,7 +499,7 @@ $('liveBtn').onclick=async()=>{
     const prompt=await buildPrompt('json');
     const t0=Date.now();
     const tick=setInterval(()=>{status.textContent=
-      `Claude is auditing… ${Math.round((Date.now()-t0)/1000)}s elapsed (a full audit typically takes 30-90s — the report appears here when done)`;},1000);
+      `Claude is auditing… ${Math.round((Date.now()-t0)/1000)}s elapsed (a full audit typically takes 30-90s - the report appears here when done)`;},1000);
     const ctrl=new AbortController();
     const kill=setTimeout(()=>ctrl.abort(),150000);   // 2.5 min hard timeout
     let r;
