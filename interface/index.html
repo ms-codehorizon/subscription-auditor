@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Subscription Auditor - the operator that cancels what you forgot you were paying for</title>
-<meta name="description" content="A free, drop-in operator folder for Claude. Paste your recurring charges and get a decision on every one - KEEP, DOWNGRADE, CANCEL, or FLAG - with the rule cited and the action drafted.">
+<meta name="description" content="A free, drop-in AI operator folder - works with Claude, ChatGPT, Gemini, or any capable LLM. Paste your recurring charges and get a decision on every one - KEEP, DOWNGRADE, CANCEL, or FLAG - with the rule cited and the action drafted.">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
 <style>
 :root{--bg:#fdfaf4;--bg2:#f3f7ff;--panel:#ffffff;--panel2:#f1edff;--text:#22293a;--muted:#6d7588;--accent:#5b5bd6;--green:#0e9f6e;--warn:#c47b08;--red:#e0443a;--blue:#2f6fed;--border:#e8e3d8;--code:#f6f3ec}
@@ -142,8 +142,6 @@ pre.tree .f{color:var(--green)}
 .archnote{color:var(--muted);font-size:15px;max-width:680px;margin:18px auto 0;text-align:center}
 
 /* footer */
-.nocatch{text-align:center}
-.nocatch .ctas{justify-content:center}
 footer{border-top:1px solid var(--border);padding:36px 0;color:var(--muted);font-size:13.5px;text-align:center}
 @media (max-width:640px){.rowg{grid-template-columns:1fr .6fr 28px}.rowg input:nth-child(3),.rowg input:nth-child(4),.rowg span:nth-child(3),.rowg span:nth-child(4){display:none}}
 
@@ -199,16 +197,16 @@ footer{background:var(--bg2)}
 <a class="nl" href="#demo">Try it</a>
 <a class="nl" href="#how">How it works</a>
 <a class="nl" href="#arch">Architecture</a>
-<a class="gh" href="#github">GitHub</a>
+<a class="gh" href="https://github.com/ms-codehorizon/subscription-auditor" target="_blank" rel="noopener">GitHub</a>
 </div></nav>
 
 <header class="hero"><div class="wrap">
-<span class="kicker">A subscription operator for Claude</span>
+<span class="kicker">An AI subscription operator · works with any LLM</span>
 <h1>The auditor that cancels what you <em>forgot</em> you were paying for.</h1>
 <p class="lead">Paste your recurring charges. Every one comes back with a decision - the rule that fired, the cancellation email already drafted, and the savings added up. Built for everyone whose free trials outlive their memory.</p>
 <div class="ctas">
 <a class="btn primary" href="#demo">Watch it audit 10 subscriptions →</a>
-<a class="btn ghost" href="#github">Get the folder, free</a>
+<a class="btn ghost" href="https://github.com/ms-codehorizon/subscription-auditor" target="_blank" rel="noopener">Get the folder, free</a>
 </div>
 <p class="creed"><b>It decides - it never kicks the question back.</b> &nbsp;KEEP · DOWNGRADE · CANCEL · FLAG, every time.</p>
 </div></header>
@@ -271,7 +269,7 @@ footer{background:var(--bg2)}
 <section class="alt" id="demo"><div class="wrap">
 <div class="sk">Try it</div>
 <h2>Run the audit yourself.</h2>
-<p class="sect-lead">Watch the recorded demo (no key, instant), run it live against Claude with your own API key (stays in your browser), or copy the assembled prompt into any Claude chat.</p>
+<p class="sect-lead">Watch the recorded demo (no key, instant), run it live with your own Anthropic API key (stays in your browser), or copy the assembled prompt into any AI chat - Claude, ChatGPT, Gemini, whichever you use.</p>
 
 <div class="app">
 <div class="stats" id="stats">
@@ -291,7 +289,7 @@ footer{background:var(--bg2)}
 <div class="actions">
 <button class="abtn demo" id="demoBtn">▶ Watch demo audit</button>
 <button class="abtn live" id="liveBtn">🔑 Run live audit</button>
-<button class="abtn copy" id="copyBtn">📋 Copy prompt for Claude</button>
+<button class="abtn copy" id="copyBtn">📋 Copy prompt for any LLM</button>
 </div>
 <details id="keybox"><summary>API key for live mode (stays in your browser, sent only to api.anthropic.com)</summary>
 <input type="password" id="apiKey" placeholder="sk-ant-..." style="margin-top:8px;max-width:480px">
@@ -301,7 +299,7 @@ footer{background:var(--bg2)}
 
 <div id="results">
   <h3>Audit report <span class="demotag" id="demotag">recorded demo</span></h3>
-  <p class="demonote" id="demonote">This is a <b>recorded snapshot</b> of a real run - editing the md files won't change it. To audit with the <b>current</b> rules: click <b>📋 Copy prompt for Claude</b> and paste into any Claude chat (no API key needed), or run live with your own key. Rows marked ✉ have the full drafted output - expand them.</p>
+  <p class="demonote" id="demonote">This is a <b>recorded snapshot</b> of a real run - editing the md files won't change it. To audit with the <b>current</b> rules: click <b>📋 Copy prompt for any LLM</b> and paste into Claude, ChatGPT, or Gemini (no API key needed), or run live with your own key. Rows marked ✉ have the full drafted output - expand them.</p>
   <div class="chips" id="chips"></div>
   <table class="audit"><thead><tr><th>Subscription</th><th>$/mo</th><th>Decision</th><th>Rule</th><th>Action</th></tr></thead>
   <tbody id="tbody"></tbody></table>
@@ -315,7 +313,7 @@ footer{background:var(--bg2)}
 <div class="sk">How it works</div>
 <h2>A minute to set up. A statement to paste.</h2>
 <div class="steps">
-<div class="step"><div class="n">1</div><h3>Drop in the folder</h3><p>Put the auditor folder into a Claude Project (or Claude Code, or this page). Claude becomes the operator - identity, rules, examples and templates all loaded.</p></div>
+<div class="step"><div class="n">1</div><h3>Drop in the folder</h3><p>Put the auditor folder into a Claude Project, a ChatGPT Project, a Gemini Gem - or just paste the files into any chat. The model becomes the operator: identity, rules, examples and templates all loaded.</p></div>
 <div class="step"><div class="n">2</div><h3>Tune the brain, once</h3><p>Open <b>rules.md</b> and make the thresholds yours: the unused-days cutoff, the protected list, the preferences table that breaks overlap ties. Plain English, ~5 minutes.</p></div>
 <div class="step"><div class="n">3</div><h3>Paste your charges</h3><p>Name and price is enough. Back comes one table: a decision per line, the rule that fired, drafted actions, and the monthly savings if you execute.</p></div>
 </div>
@@ -334,16 +332,7 @@ footer{background:var(--bg2)}
 │   └── cancellation-templates.md <span class="c"># drafted emails + report format</span>
 └── interface/       <span class="c"># this page + a local Flask app - zero decision logic inside</span></pre>
 <p class="archnote">The rules short-circuit: assumptions and price normalization first, then the protected list, renewal urgency, usage, overlap, escalation, price-creep. First rule that fires decides, and every output cites its rule number.</p>
-<p class="archnote">Nothing is a black box. Edit one line in <b>rules.md</b> and every interface - Claude project, this page, the local app - changes behavior instantly, because they all read the same files. Decision logic you can read, diff, and trust.</p>
-</div></section>
-
-<section class="nocatch" id="github"><div class="wrap">
-<div class="sk">No catch</div>
-<h2>It's a folder, not a SaaS.</h2>
-<p class="sect-lead" style="margin-left:auto;margin-right:auto">No account, no server, no per-seat pricing. Plain markdown you drop into Claude. Take it, fork it, change the rules to match how you actually decide.</p>
-<div class="ctas">
-<a class="btn primary" href="https://github.com" onclick="alert('Repo link goes here after the GitHub push');return false">Get it on GitHub →</a>
-</div>
+<p class="archnote">Nothing is a black box. Edit one line in <b>rules.md</b> and every interface - any AI chat, this page, the local app - changes behavior instantly, because they all read the same files. Decision logic you can read, diff, and trust.</p>
 </div></section>
 
 <footer><div class="wrap">
@@ -358,11 +347,19 @@ function addRow(v={}){
   d.innerHTML=`<input type="text" placeholder="Netflix" value="${v.n||''}">
   <input type="text" placeholder="$15/mo" value="${v.p||''}">
   <input type="text" placeholder="yesterday / blank" value="${v.u||''}">
-  <input type="text" placeholder="me / family" value="${v.w||''}">
+  <input type="text" placeholder="me / family + any notes" value="${v.w||''}">
   <button class="del" onclick="this.parentNode.remove()">✕</button>`;
   rowsEl.appendChild(d);
 }
-function clearRows(){rowsEl.innerHTML='';addRow();addRow();}
+function clearRows(){
+  rowsEl.innerHTML='';addRow();addRow();
+  // clear any previous report and stats too
+  document.getElementById('results').style.display='none';
+  document.getElementById('mdout').style.display='none';
+  document.getElementById('stats').classList.remove('show');
+  document.getElementById('auditlog').style.display='none';
+  const st=document.getElementById('status');st.className='status';st.textContent='';
+}
 function serialize(){
   return [...rowsEl.children].map(r=>{
     const [n,p,u,w]=[...r.querySelectorAll('input')].map(i=>i.value.trim());
@@ -510,8 +507,8 @@ $('liveBtn').onclick=async()=>{
           messages:[{role:'user',content:prompt}]})});
     }catch(e){
       clearInterval(tick);clearTimeout(kill);
-      if(e.name==='AbortError')throw new Error('Timed out after 2.5 minutes - Anthropic may be slow right now. Try again, or use 📋 Copy prompt for Claude → paste into claude.ai.');
-      throw new Error('The call to api.anthropic.com was blocked before reaching Anthropic. Usual causes: an ad/privacy blocker, a strict browser (try Chrome), or no internet. Fallback that always works: 📋 Copy prompt for Claude → paste into claude.ai.');
+      if(e.name==='AbortError')throw new Error('Timed out after 2.5 minutes - Anthropic may be slow right now. Try again, or use 📋 Copy prompt → paste into any LLM chat.');
+      throw new Error('The call to api.anthropic.com was blocked before reaching Anthropic. Usual causes: an ad/privacy blocker, a strict browser (try Chrome), or no internet. Fallback that always works: 📋 Copy prompt → paste into any LLM chat.');
     }
     clearInterval(tick);clearTimeout(kill);
     const d=await r.json();
@@ -548,7 +545,7 @@ $('copyBtn').onclick=async()=>{
     const p=await buildPrompt();
     await navigator.clipboard.writeText(p);
     status.className='status';
-    status.textContent=`Prompt copied (${p.length.toLocaleString()} chars) - paste into any Claude chat.`;
+    status.textContent=`Prompt copied (${p.length.toLocaleString()} chars) - paste into Claude, ChatGPT, Gemini, or any LLM chat.`;
   }catch(e){status.className='status err';status.textContent=e.message;}
 };
 </script>

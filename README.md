@@ -7,6 +7,8 @@ steps, retention emails, downgrade paths), and a savings total.
 
 It decides. It doesn't ask you what to do.
 
+**🔎 Live demo:** [ms-codehorizon.github.io/subscription-auditor](https://ms-codehorizon.github.io/subscription-auditor/) - recorded audit in one click, live mode with your own API key, no install.
+
 ## Why this project is interesting
 
 Most AI apps bury their behavior in prompts inside code. This one inverts
@@ -43,9 +45,10 @@ four edge cases buried in them.
 your browser's localStorage and is sent only to `api.anthropic.com` -
 this page has no server.
 
-**No key at all:** **📋 Copy prompt for Claude** assembles the full
-operator prompt; paste it into any Claude chat. Or skip the interface
-entirely: drop this folder into a Claude project and say *"Act as the
+**No key at all:** **📋 Copy prompt for any LLM** assembles the full
+operator prompt; paste it into Claude, ChatGPT, Gemini, or any capable
+model. Or skip the interface entirely: drop this folder into a Claude
+Project (or any assistant that accepts files) and say *"Act as the
 operator defined in this folder. Audit my subscriptions: …"*
 
 **Local app with history:** `interface/app.py` (Flask) - your key in
