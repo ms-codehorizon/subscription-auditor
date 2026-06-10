@@ -54,6 +54,9 @@ operator defined in this folder. Audit my subscriptions: …"*
 **Local app with history:** `interface/app.py` (Flask) - your key in
 `.env`, every audit logged to `history.json` for month-over-month
 comparison. `pip install flask anthropic && python app.py` → `localhost:5050`.
+This is the **only** interface that saves anything. The web page - local
+or hosted - keeps no history: results exist on screen only and are gone
+when you leave. Nothing you enter on the hosted site is stored anywhere.
 
 ## How it decides
 
