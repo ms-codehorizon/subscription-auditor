@@ -2,9 +2,6 @@
 .env
 *.env
 
-# Per-run data (Layer 4) — personal, stays local
-interface/history.json
-
 # Python
 __pycache__/
 *.pyc

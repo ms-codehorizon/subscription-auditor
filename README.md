@@ -19,10 +19,10 @@ duplication:
 ```
                     ┌── Claude project / Claude Code  (drop the folder in)
  identity.md        │
- rules.md      ──→  ├── Static web console  (demo / bring-your-own-key /
- examples.md        │    copy-prompt - GitHub Pages, no server)
+ rules.md      ──→  ├── Static web page  (demo / bring-your-own-key -
+ examples.md        │    GitHub Pages, no server)
  reference/         │
-                    └── Local Flask app  (your key in .env, audit history)
+                    └── Copy-prompt  (paste into any LLM chat)
 ```
 
 Edit one rule in `rules.md` and all three interfaces change behavior
@@ -51,12 +51,10 @@ model. Or skip the interface entirely: drop this folder into a Claude
 Project (or any assistant that accepts files) and say *"Act as the
 operator defined in this folder. Audit my subscriptions: …"*
 
-**Local app with history:** `interface/app.py` (Flask) - your key in
-`.env`, every audit logged to `history.json` for month-over-month
-comparison. `pip install flask anthropic && python app.py` → `localhost:5050`.
-This is the **only** interface that saves anything. The web page - local
-or hosted - keeps no history: results exist on screen only and are gone
-when you leave. Nothing you enter on the hosted site is stored anywhere.
+**Nothing is stored anywhere.** No interface saves your data: results
+exist on screen only and are gone when you leave. For month-over-month
+tracking, save the report yourself and paste it back next time - the
+operator will diff it against your new list.
 
 ## How it decides
 
@@ -111,9 +109,7 @@ and ambiguity is illegal - even ties have a written tiebreaker.
 - All dynamic content (user input and LLM output) is HTML-escaped before
   rendering; a meta CSP restricts network targets to api.anthropic.com
 - Zero third-party scripts - the page has no CDN dependencies
-- Flask mode: key read from local `.env`, never logged; localhost only -
-  don't expose port 5050 to your network
-- `history.json` (personal audit data) is gitignored
+- No server-side component anywhere - nothing to breach, nothing stored
 
 ## Edge cases it handles (not hand-waves)
 
@@ -127,8 +123,9 @@ retention-offer email drafted before cancellation (6a).
 
 ## Roadmap
 
-Month-over-month diff audits from `history.json` · bank-statement paste
-format · PAUSE as a first-class decision · packaged as a Claude Skill.
+Month-over-month diffs (paste last month's report back in) ·
+bank-statement paste format · PAUSE as a first-class decision ·
+packaged as a Claude Skill.
 
 ---
 *Built as an exercise in ICM (folder-as-architecture) - decision logic

@@ -331,7 +331,7 @@ footer{background:var(--bg2)}
 ├── reference/
 │   ├── input-template.md         <span class="c"># the paste format</span>
 │   └── cancellation-templates.md <span class="c"># drafted emails + report format</span>
-└── interface/       <span class="c"># this page + a local Flask app - zero decision logic inside</span></pre>
+└── interface/       <span class="c"># this page - zero decision logic inside</span></pre>
 <p class="archnote">The rules short-circuit: assumptions and price normalization first, then the protected list, renewal urgency, usage, overlap, escalation, price-creep. First rule that fires decides, and every output cites its rule number.</p>
 <p class="archnote">Nothing is a black box. Edit one line in <b>rules.md</b> and every interface - any AI chat, this page, the local app - changes behavior instantly, because they all read the same files. Decision logic you can read, diff, and trust.</p>
 </div></section>
