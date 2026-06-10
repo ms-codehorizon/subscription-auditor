@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subscription Auditor - the operator that cancels what you forgot you were paying for</title>
+<meta name="description" content="A free, drop-in operator folder for Claude. Paste your recurring charges and get a decision on every one - KEEP, DOWNGRADE, CANCEL, or FLAG - with the rule cited and the action drafted.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
+<style>
+:root{--bg:#fdfaf4;--bg2:#f3f7ff;--panel:#ffffff;--panel2:#f1edff;--text:#22293a;--muted:#6d7588;--accent:#5b5bd6;--green:#0e9f6e;--warn:#c47b08;--red:#e0443a;--blue:#2f6fed;--border:#e8e3d8;--code:#f6f3ec}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+a{color:var(--accent);text-decoration:none}
+.wrap{max-width:1020px;margin:0 auto;padding:0 24px}
+
+/* nav */
+nav{position:sticky;top:0;z-index:20;background:rgba(253,250,244,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+nav .wrap{display:flex;align-items:center;gap:22px;padding:14px 24px}
+.logo{font-weight:800;font-size:16px;white-space:nowrap}
+nav a.nl{color:var(--muted);font-size:14px;white-space:nowrap}
+nav a.nl:hover{color:var(--text)}
+nav a.nl:first-of-type{margin-left:auto}
+nav .gh{background:var(--panel2);border:1px solid var(--border);padding:7px 16px;border-radius:9px;color:var(--text);font-size:13.5px;font-weight:600;white-space:nowrap}
+@media (max-width:720px){nav a.nl{display:none}nav .gh{margin-left:auto}}
+
+/* hero */
+.hero{padding:88px 0 70px;text-align:center;background:
+  radial-gradient(640px 320px at 30% -60px,rgba(91,91,214,.14),transparent),
+  radial-gradient(560px 300px at 75% -20px,rgba(14,159,110,.13),transparent),
+  radial-gradient(420px 240px at 55% 120px,rgba(255,184,46,.12),transparent)}
+.kicker{display:inline-block;font-size:12.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);border:1px solid rgba(126,224,163,.3);padding:5px 14px;border-radius:99px;margin-bottom:22px}
+h1{font-size:clamp(30px,5.2vw,52px);line-height:1.12;letter-spacing:-1.2px;font-weight:800;max-width:760px;margin:0 auto}
+h1 em{font-style:normal;color:var(--green)}
+.lead{max-width:640px;margin:20px auto 0;color:var(--muted);font-size:17.5px}
+.ctas{margin-top:32px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{border:none;border-radius:12px;padding:14px 26px;font-size:15.5px;font-weight:700;cursor:pointer;display:inline-block}
+.btn.primary{background:var(--green);color:#08130c}
+.btn.ghost{background:var(--panel);color:var(--text);border:1px solid var(--border)}
+.btn:hover{filter:brightness(1.1)}
+.creed{margin-top:26px;font-size:14px;color:var(--muted)}
+.creed b{color:var(--text)}
+
+/* sections */
+section{padding:72px 0;scroll-margin-top:64px}
+section.alt{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.sk{font-size:12.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;text-align:center}
+h2{font-size:clamp(24px,3.4vw,34px);letter-spacing:-.6px;line-height:1.2;max-width:680px;margin-left:auto;margin-right:auto;text-align:center}
+.sect-lead{color:var(--muted);max-width:640px;margin:12px auto 0;font-size:16px;text-align:center}
+
+/* problem stats */
+.statrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:36px}
+.bigstat{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;flex-direction:column}
+.bigstat .v{font-size:34px;font-weight:800;color:var(--green);line-height:1.1}
+.bigstat .l{color:var(--muted);font-size:13.5px;margin-top:8px}
+
+/* decision cards */
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:36px}
+.dcard{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:24px 22px}
+.dcard h3{font-size:17px;margin-bottom:8px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:99px;margin-right:8px}
+.dcard p{color:var(--muted);font-size:14px}
+
+/* worked calls */
+.calls{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:36px}
+.call{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:12px}
+.call .src{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;min-height:30px}
+.call .in{font-size:14px;background:var(--code);border:1px solid var(--border);border-radius:10px;padding:12px;min-height:96px}
+.call .arrow{text-align:center;color:var(--muted)}
+.call .out{font-size:14px}
+.call .moral{font-size:13px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px;margin-top:auto}
+.badge{display:inline-block;padding:4px 13px;border-radius:99px;font-size:12px;font-weight:800;letter-spacing:.3px;white-space:nowrap}
+.b-cancel{background:rgba(255,123,123,.15);color:var(--red)}
+.b-keep{background:rgba(126,224,163,.15);color:var(--green)}
+.b-flag{background:rgba(255,195,107,.15);color:var(--warn)}
+.b-down{background:rgba(138,184,255,.15);color:var(--blue)}
+.realnote{margin-top:22px;font-size:13.5px;color:var(--muted);text-align:center}
+.realnote b{color:var(--green)}
+
+/* demo app */
+.app{background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:26px;margin-top:36px}
+.stats{display:none;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.stats.show{display:grid;animation:fade .6s}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px 16px}
+.stat .v{font-size:24px;font-weight:800;color:var(--green)}
+.stat .v.blue{color:var(--accent)}
+.stat .l{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.app h3{font-size:14px;color:var(--accent);margin:14px 0 10px;text-transform:uppercase;letter-spacing:.8px}
+.rowg{display:grid;grid-template-columns:1.4fr .7fr .9fr .9fr 34px;gap:8px;margin-bottom:8px}
+.rowh{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+input[type=text],input[type=password]{width:100%;background:var(--code);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13.5px}
+input:focus{outline:none;border-color:var(--accent)}
+.del{background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;cursor:pointer}
+.del:hover{color:var(--red);border-color:var(--red)}
+.mini{background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;font-weight:600;margin:6px 8px 0 0}
+.mini:hover{border-color:var(--accent);color:var(--accent)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 4px}
+.abtn{border:none;border-radius:11px;padding:13px 20px;font-size:14.5px;font-weight:700;cursor:pointer}
+.abtn.demo{background:var(--green);color:#08130c}
+.abtn.live{background:var(--accent);color:#081320}
+.abtn.copy{background:var(--panel2);color:var(--text);border:1px solid var(--border)}
+.abtn:hover{filter:brightness(1.1)}
+.abtn:disabled{opacity:.45;cursor:wait}
+details{margin:10px 0}
+summary{cursor:pointer;color:var(--muted);font-size:13.5px}
+.status{margin-top:10px;font-size:14px;color:var(--green);min-height:20px}
+.status.err{color:var(--warn)}
+#auditlog{font-family:Menlo,Consolas,monospace;font-size:12.5px;color:var(--muted);margin-top:10px;display:none}
+#auditlog div{opacity:0;animation:fade .4s forwards}
+@keyframes fade{to{opacity:1}}
+#auditlog .ok{color:var(--green)}
+#results{display:none;margin-top:18px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.chip{padding:6px 14px;border-radius:99px;border:1px solid var(--border);background:var(--bg2);color:var(--muted);font-size:13px;cursor:pointer;font-weight:600}
+.chip.on{border-color:var(--accent);color:var(--accent);background:var(--panel2)}
+table.audit{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--bg2);border-radius:12px;overflow:hidden}
+table.audit th{background:var(--panel2);color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;text-align:left}
+table.audit td{padding:11px 12px;border-top:1px solid var(--border);vertical-align:top}
+tr.hidden{display:none}
+tr.urgent td:first-child{border-left:3px solid var(--red)}
+.rule{font-family:Menlo,monospace;font-size:11.5px;color:var(--muted)}
+.why{color:var(--muted);font-size:12.5px;margin-top:3px}
+#weekbox{background:var(--bg2);border-left:3px solid var(--green);border-radius:0 12px 12px 0;padding:14px 18px;margin-top:16px;font-size:14px}
+#weekbox h4{color:var(--green);font-size:13.5px;margin-bottom:6px}
+#mdout{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px;display:none}
+#mdout table{border-collapse:collapse;width:100%;font-size:13px;display:block;overflow-x:auto}
+#mdout th,#mdout td{border-bottom:1px solid var(--border);padding:8px;text-align:left}
+#mdout h2,#mdout h3{color:var(--accent);margin:12px 0 6px;font-size:17px;max-width:none;text-align:left}
+.demotag{display:inline-block;background:var(--panel2);color:var(--green);font-size:11.5px;padding:2px 10px;border-radius:99px;margin-left:8px;vertical-align:middle}
+
+/* how it works */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:36px}
+.step{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:24px}
+.step .n{width:34px;height:34px;border-radius:99px;background:var(--panel2);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;margin-bottom:14px}
+.step h3{font-size:16.5px;margin-bottom:8px}
+.step p{color:var(--muted);font-size:14px}
+
+/* architecture */
+pre.tree{background:var(--code);border:1px solid var(--border);border-radius:14px;padding:22px;font-family:Menlo,Consolas,monospace;font-size:13px;line-height:1.7;overflow-x:auto;margin-top:30px}
+pre.tree .c{color:#5b6377}
+pre.tree .f{color:var(--green)}
+.archnote{color:var(--muted);font-size:15px;max-width:680px;margin:18px auto 0;text-align:center}
+
+/* footer */
+.nocatch{text-align:center}
+.nocatch .ctas{justify-content:center}
+footer{border-top:1px solid var(--border);padding:36px 0;color:var(--muted);font-size:13.5px;text-align:center}
+@media (max-width:640px){.rowg{grid-template-columns:1fr .6fr 28px}.rowg input:nth-child(3),.rowg input:nth-child(4),.rowg span:nth-child(3),.rowg span:nth-child(4){display:none}}
+
+/* ---- lively light-theme polish ---- */
+h1 em{background:linear-gradient(100deg,var(--green),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+.kicker{background:#fff;border-color:rgba(14,159,110,.35);color:var(--green);box-shadow:0 2px 10px rgba(34,41,58,.05)}
+.btn.primary{background:linear-gradient(100deg,#0e9f6e,#0b8a60);color:#fff;box-shadow:0 6px 18px rgba(14,159,110,.28)}
+.btn.ghost{background:#fff;box-shadow:0 2px 10px rgba(34,41,58,.06)}
+.abtn.demo{background:linear-gradient(100deg,#0e9f6e,#0b8a60);color:#fff;box-shadow:0 4px 14px rgba(14,159,110,.25)}
+.abtn.live{background:linear-gradient(100deg,#5b5bd6,#4646c6);color:#fff;box-shadow:0 4px 14px rgba(91,91,214,.25)}
+.abtn.copy{background:#fff}
+nav .gh{background:#22293a;color:#fff;border:none}
+.dcard,.call,.step,.bigstat,.app{box-shadow:0 10px 30px rgba(34,41,58,.07)}
+.dcard{border-top:4px solid var(--border)}
+.dcard:nth-child(1){border-top-color:var(--green)}
+.dcard:nth-child(2){border-top-color:var(--blue)}
+.dcard:nth-child(3){border-top-color:var(--red)}
+.dcard:nth-child(4){border-top-color:var(--warn)}
+.dcard:hover,.call:hover,.step:hover{transform:translateY(-3px);transition:transform .2s}
+.b-cancel{background:rgba(224,68,58,.1)}
+.b-keep{background:rgba(14,159,110,.1)}
+.b-flag{background:rgba(196,123,8,.12)}
+.b-down{background:rgba(47,111,237,.1)}
+.stat{background:#fff}
+.stat .v{color:var(--green)}
+table.audit{background:#fff;border:1px solid var(--border)}
+table.audit th{background:var(--panel2)}
+#weekbox{background:rgba(14,159,110,.07)}
+#mdout{background:#fff}
+.chip{background:#fff}
+.chip.on{background:var(--panel2)}
+.demotag{background:rgba(14,159,110,.1)}
+.draftbox{margin-top:8px;background:#fff;border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--text);white-space:pre-line}
+details.draft summary{color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;margin-top:6px}
+.demonote{font-size:12.5px;color:var(--muted);margin:6px 0 12px}
+.demonote b{color:var(--green)}
+section.alt{background:var(--bg2)}
+pre.tree{box-shadow:inset 0 1px 3px rgba(34,41,58,.05)}
+pre.tree .c{color:#9aa1b2}
+.step .n{background:linear-gradient(100deg,var(--accent),var(--blue));color:#fff}
+input[type=text],input[type=password]{background:#fff;border-color:#ddd6c8}
+.del{background:#fff}
+.mini{background:#fff}
+#auditlog{color:var(--muted)}
+footer{background:var(--bg2)}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+<span class="logo">💸 Subscription Auditor</span>
+<a class="nl" href="#decide">See it decide</a>
+<a class="nl" href="#demo">Try it</a>
+<a class="nl" href="#how">How it works</a>
+<a class="nl" href="#arch">Architecture</a>
+<a class="gh" href="#github">GitHub</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+<span class="kicker">A subscription operator for Claude</span>
+<h1>The auditor that cancels what you <em>forgot</em> you were paying for.</h1>
+<p class="lead">Paste your recurring charges. Every one comes back with a decision - the rule that fired, the cancellation email already drafted, and the savings added up. Built for everyone whose free trials outlive their memory.</p>
+<div class="ctas">
+<a class="btn primary" href="#demo">Watch it audit 10 subscriptions →</a>
+<a class="btn ghost" href="#github">Get the folder, free</a>
+</div>
+<p class="creed"><b>It decides - it never kicks the question back.</b> &nbsp;KEEP · DOWNGRADE · CANCEL · FLAG, every time.</p>
+</div></header>
+
+<section><div class="wrap">
+<div class="sk">The problem</div>
+<h2>Subscriptions don't die. They hide.</h2>
+<p class="sect-lead">Every one made sense the day you signed up. Then the trial converted, the price crept, a second tool started doing the same job - and "I'll cancel it this weekend" turned into a year of charges. Reading your own statement takes an evening you keep not having.</p>
+<div class="statrow">
+<div class="bigstat"><div class="v">90 sec</div><div class="l">the keep-or-cancel call a human makes per line, when they finally sit down to it</div></div>
+<div class="bigstat"><div class="v">$936/yr</div><div class="l">found by one pass of the demo audit below - ten subscriptions, four hidden traps</div></div>
+<div class="bigstat"><div class="v">0</div><div class="l">decisions it hands back to you with "well, it depends"</div></div>
+</div>
+</div></section>
+
+<section class="alt"><div class="wrap">
+<div class="sk">What it does</div>
+<h2>Every charge leaves with one decision.</h2>
+<div class="grid4">
+<div class="dcard"><h3><span class="dot" style="background:var(--green)"></span>KEEP</h3><p>Earning its price. Logged with a one-line justification and a next-review date - nothing is kept forever by default.</p></div>
+<div class="dcard"><h3><span class="dot" style="background:var(--blue)"></span>DOWNGRADE</h3><p>Right service, wrong tier. Names the cheaper plan and drafts the switch steps. Family plans serving one person, premium tiers nobody streams in 4K.</p></div>
+<div class="dcard"><h3><span class="dot" style="background:var(--red)"></span>CANCEL</h3><p>The workhorse. Cancellation steps drafted, data-export plan included when needed, retention-offer email written first when the price has crept.</p></div>
+<div class="dcard"><h3><span class="dot" style="background:var(--warn)"></span>FLAG</h3><p>Rare, and it still does the work: states what's unknown, who to ask, and what the decision becomes once answered. One question, pre-loaded either way.</p></div>
+</div>
+</div></section>
+
+<section id="decide"><div class="wrap">
+<div class="sk">See it decide</div>
+<h2>Three charges. Three different calls.</h2>
+<p class="sect-lead">Decisions come from numbered rules checked in order - not vibes. The first rule that fires wins, and it's cited so you can audit the auditor.</p>
+<div class="calls">
+<div class="call">
+<span class="src">Annual plan · renews in 26 days</span>
+<div class="in">Adobe Photography, $119.88/yr. Last used 2 months ago. 40GB of photos in Adobe cloud.</div>
+<div class="arrow">↓</div>
+<div class="out"><span class="badge b-cancel">CANCEL AT RENEWAL</span> <span class="rule">rules 2a+1d+3a</span>
+<p class="why">Unused, but cloud photos block instant cancellation and refund-chasing mid-term is a waste. Plan: export photos this week, kill auto-renew today, access runs to renewal.</p></div>
+<div class="moral">Three rules conflict; the operator sequences them into a dated plan instead of asking what you want to do.</div>
+</div>
+<div class="call">
+<span class="src">Overlap · both used daily</span>
+<div class="in">ChatGPT Plus, $20/mo. Claude Pro, $20/mo. Same category, usage tied.</div>
+<div class="arrow">↓</div>
+<div class="out"><span class="badge b-cancel">CANCEL ChatGPT</span> <span class="rule">rules 4a+4d</span>
+<p class="why">Two tools, one job, $40/mo. Usage can't break the tie - the user's preferences table can: preferred AI assistant = Claude. No coin flips allowed.</p></div>
+<div class="moral">Ties are decided by a rule you wrote once, not by whatever the model felt like today.</div>
+</div>
+<div class="call">
+<span class="src">Shared service · partner usage unknown</span>
+<div class="in">Disney+, $13.99/mo. You: never watch. Partner: unknown.</div>
+<div class="arrow">↓</div>
+<div class="out"><span class="badge b-flag">FLAG</span> <span class="rule">rule 5a</span>
+<p class="why">Not the operator's call to cancel what someone else might use. But the flag ships with the answer pre-loaded: "If they haven't watched in 30 days, CANCEL per 3a."</p></div>
+<div class="moral">Even escalation does the work - one question to ask, decision ready for either answer.</div>
+</div>
+</div>
+<p class="realnote"><b>Real outputs</b> - produced by the rules in this folder, refined through test runs that exposed and fixed three rule gaps. The git history shows the corrections.</p>
+</div></section>
+
+<section class="alt" id="demo"><div class="wrap">
+<div class="sk">Try it</div>
+<h2>Run the audit yourself.</h2>
+<p class="sect-lead">Watch the recorded demo (no key, instant), run it live against Claude with your own API key (stays in your browser), or copy the assembled prompt into any Claude chat.</p>
+
+<div class="app">
+<div class="stats" id="stats">
+  <div class="stat"><div class="v blue" id="stTotal">$0</div><div class="l">monthly spend</div></div>
+  <div class="stat"><div class="v" id="stSave">$0</div><div class="l">savings /mo</div></div>
+  <div class="stat"><div class="v" id="stYear">$0</div><div class="l">savings /yr</div></div>
+  <div class="stat"><div class="v blue" id="stCount">0</div><div class="l">decisions</div></div>
+</div>
+
+<h3>Your subscriptions</h3>
+<div class="rowg rowh"><span>Name</span><span>Price</span><span>Last used</span><span>Who uses it</span><span></span></div>
+<div id="rows"></div>
+<button class="mini" onclick="addRow()">+ Add row</button>
+<button class="mini" onclick="loadSample()">Load sample data</button>
+<button class="mini" onclick="clearRows()">Clear</button>
+
+<div class="actions">
+<button class="abtn demo" id="demoBtn">▶ Watch demo audit</button>
+<button class="abtn live" id="liveBtn">🔑 Run live audit</button>
+<button class="abtn copy" id="copyBtn">📋 Copy prompt for Claude</button>
+</div>
+<details id="keybox"><summary>API key for live mode (stays in your browser, sent only to api.anthropic.com)</summary>
+<input type="password" id="apiKey" placeholder="sk-ant-..." style="margin-top:8px;max-width:480px">
+</details>
+<div class="status" id="status"></div>
+<div id="auditlog"></div>
+
+<div id="results">
+  <h3>Audit report <span class="demotag" id="demotag">recorded demo</span></h3>
+  <p class="demonote" id="demonote">This is a <b>recorded snapshot</b> of a real run - editing the md files won't change it. To audit with the <b>current</b> rules: click <b>📋 Copy prompt for Claude</b> and paste into any Claude chat (no API key needed), or run live with your own key. Rows marked ✉ have the full drafted output - expand them.</p>
+  <div class="chips" id="chips"></div>
+  <table class="audit"><thead><tr><th>Subscription</th><th>$/mo</th><th>Decision</th><th>Rule</th><th>Action</th></tr></thead>
+  <tbody id="tbody"></tbody></table>
+  <div id="weekbox"></div>
+</div>
+<div id="mdout"></div>
+</div>
+</div></section>
+
+<section id="how"><div class="wrap">
+<div class="sk">How it works</div>
+<h2>A minute to set up. A statement to paste.</h2>
+<div class="steps">
+<div class="step"><div class="n">1</div><h3>Drop in the folder</h3><p>Put the auditor folder into a Claude Project (or Claude Code, or this page). Claude becomes the operator - identity, rules, examples and templates all loaded.</p></div>
+<div class="step"><div class="n">2</div><h3>Tune the brain, once</h3><p>Open <b>rules.md</b> and make the thresholds yours: the unused-days cutoff, the protected list, the preferences table that breaks overlap ties. Plain English, ~5 minutes.</p></div>
+<div class="step"><div class="n">3</div><h3>Paste your charges</h3><p>Name and price is enough. Back comes one table: a decision per line, the rule that fired, drafted actions, and the monthly savings if you execute.</p></div>
+</div>
+</div></section>
+
+<section class="alt" id="arch"><div class="wrap">
+<div class="sk">The methodology</div>
+<h2>Folders as architecture. Each file does one job.</h2>
+<pre class="tree">subscription-auditor/
+├── <span class="f">identity.md</span>      <span class="c"># who the operator is, what it refuses to touch</span>
+├── <span class="f">rules.md</span>         <span class="c"># the decision logic - numbered, checked in order (the heart)</span>
+├── <span class="f">examples.md</span>      <span class="c"># five worked decisions, including the layered edge cases</span>
+├── <span class="f">README.md</span>        <span class="c"># how a stranger uses it</span>
+├── reference/
+│   ├── input-template.md         <span class="c"># the paste format</span>
+│   └── cancellation-templates.md <span class="c"># drafted emails + report format</span>
+└── interface/       <span class="c"># this page + a local Flask app - zero decision logic inside</span></pre>
+<p class="archnote">The rules short-circuit: assumptions and price normalization first, then the protected list, renewal urgency, usage, overlap, escalation, price-creep. First rule that fires decides, and every output cites its rule number.</p>
+<p class="archnote">Nothing is a black box. Edit one line in <b>rules.md</b> and every interface - Claude project, this page, the local app - changes behavior instantly, because they all read the same files. Decision logic you can read, diff, and trust.</p>
+</div></section>
+
+<section class="nocatch" id="github"><div class="wrap">
+<div class="sk">No catch</div>
+<h2>It's a folder, not a SaaS.</h2>
+<p class="sect-lead" style="margin-left:auto;margin-right:auto">No account, no server, no per-seat pricing. Plain markdown you drop into Claude. Take it, fork it, change the rules to match how you actually decide.</p>
+<div class="ctas">
+<a class="btn primary" href="https://github.com" onclick="alert('Repo link goes here after the GitHub push');return false">Get it on GitHub →</a>
+</div>
+</div></section>
+
+<footer><div class="wrap">
+💸 Subscription Auditor · an operator built on interpretable context methodology - folders as architecture · decision logic you can read
+</div></footer>
+
+<script>
+/* ---------------- row builder ---------------- */
+const rowsEl=document.getElementById('rows');
+function addRow(v={}){
+  const d=document.createElement('div');d.className='rowg';
+  d.innerHTML=`<input type="text" placeholder="Netflix" value="${v.n||''}">
+  <input type="text" placeholder="$15/mo" value="${v.p||''}">
+  <input type="text" placeholder="yesterday / blank" value="${v.u||''}">
+  <input type="text" placeholder="me / family" value="${v.w||''}">
+  <button class="del" onclick="this.parentNode.remove()">✕</button>`;
+  rowsEl.appendChild(d);
+}
+function clearRows(){rowsEl.innerHTML='';addRow();addRow();}
+function serialize(){
+  return [...rowsEl.children].map(r=>{
+    const [n,p,u,w]=[...r.querySelectorAll('input')].map(i=>i.value.trim());
+    return n?`${n} ~ ${p||'?'} ~ ${u||'(blank)'} ~ ${w||'me'}`:null;
+  }).filter(Boolean).join('\n');
+}
+const SAMPLE=[
+ {n:'Netflix Premium',p:'$22.99/mo',u:'last night',w:'whole family'},
+ {n:'Hulu',p:'$17.99/mo',u:'3 months ago',w:'me'},
+ {n:'ChatGPT Plus',p:'$20/mo',u:'today',w:'me'},
+ {n:'Claude Pro',p:'$20/mo',u:'today',w:'me'},
+ {n:'1Password Families',p:'$59.88/yr',u:'constant',w:'family'},
+ {n:'iCloud+ 2TB',p:'$9.99/mo',u:'constant',w:'family photos'},
+ {n:'Peloton App',p:'$12.99/mo',u:'',w:'me'},
+ {n:'Adobe Photography',p:'$119.88/yr',u:'2 months ago',w:'me, renews in 26 days'},
+ {n:'Disney+',p:'$13.99/mo',u:'partner: unknown',w:'shared'},
+ {n:'NYT Digital',p:'$17/mo',u:'weekly',w:'me, signed up at $8/mo'}];
+function loadSample(){rowsEl.innerHTML='';SAMPLE.forEach(addRow);}
+clearRows();
+
+/* ---------------- recorded demo (Layer 4 artifact - no logic) ---------------- */
+const DEMO=[
+ {s:'Adobe Photography',c:9.99,d:'CANCEL AT RENEWAL',b:'b-cancel',r:'2a+1d+3a',urgent:true,
+  w:'Renews in 26 days, zero use in 60. Export cloud photos this week, turn OFF auto-renew today.',
+  draft:'Action plan (template A, adapted for data-protection rule 1d):\n1. This week - export all 40GB originals from Adobe cloud to local backup.\n2. Today - Account > Plans > turn OFF auto-renew (access continues until renewal).\n3. Reminder set: renewal date minus 14 days, confirm export finished.\nSaves $119.88/yr starting at renewal. Zero data lost.'},
+ {s:'Hulu',c:17.99,d:'CANCEL',b:'b-cancel',r:'3a',w:'Zero uses in 60 days, not protected. Cancel via account page.'},
+ {s:'Peloton App',c:12.99,d:'CANCEL',b:'b-cancel',r:'0a+3a',w:'ASSUMPTION: blank last-used = zero use. Wrong? Say "KEEP" for a 30-day re-review.'},
+ {s:'ChatGPT Plus',c:20,d:'CANCEL',b:'b-cancel',r:'4a+4d',w:'Overlaps Claude Pro; usage tied; preferences table keeps Claude.'},
+ {s:'NYT Digital',c:17,d:'CANCEL',b:'b-cancel',r:'6a',w:'Price +112% since signup. Retention email first (template B); cancel in 7 days if no offer.',
+  draft:'Subject: Cancellation - NYT Digital\n\nHi - I\'ve been a subscriber since 2023. The price has risen from $8 to $17 and I\'m planning to cancel at the end of this cycle. If you have a retention offer or a legacy rate available, I\'d consider staying. I would also accept pausing my subscription for a few months if that\'s an option. Otherwise please confirm cancellation effective July 1.\n\n(Drafted from reference/cancellation-templates.md, Section B - edit that file and this email\'s style changes.)'},
+ {s:'Disney+',c:13.99,d:'FLAG',b:'b-flag',r:'5a',w:'Partner usage unknown. One question; decision pre-loaded either way.'},
+ {s:'Netflix Premium',c:22.99,d:'KEEP',b:'b-keep',r:'1c',w:'Family used yesterday. Next review in 12 months.'},
+ {s:'1Password',c:4.99,d:'KEEP',b:'b-keep',r:'1a',w:'Protected: password manager. $59.88/yr normalized per 0b.'},
+ {s:'iCloud+ 2TB',c:9.99,d:'KEEP',b:'b-keep',r:'1b',w:'Protected: irreplaceable photo backup.'},
+ {s:'Claude Pro',c:20,d:'KEEP',b:'b-keep',r:'4d',w:'Preferred AI assistant - survives the overlap test.'}];
+const DEMO_SAVE=77.97,DEMO_TOTAL=149.92;
+const WEEK=`<h4>Execute this week</h4>
+1. <b>Adobe</b> - export photos, turn off auto-renew (renewal in 26 days)<br>
+2. <b>Hulu, Peloton, ChatGPT Plus</b> - cancel via account pages (~6 min)<br>
+3. <b>NYT</b> - send retention email; cancel in 7 days if no reply<br>
+4. <b>Disney+</b> - ask your partner; either answer has a pre-loaded decision`;
+
+/* ---------------- ui helpers ---------------- */
+const $=id=>document.getElementById(id);
+const status=$('status'),log=$('auditlog');
+function logSteps(steps,done){
+  log.style.display='block';log.innerHTML='';
+  steps.forEach((s,i)=>setTimeout(()=>{
+    const d=document.createElement('div');d.innerHTML=s+' <span class="ok">✓</span>';log.appendChild(d);
+    if(i===steps.length-1&&done)setTimeout(done,350);
+  },i*420));
+}
+function countUp(el,target,prefix){
+  let v=0;const step=target/40;
+  const t=setInterval(()=>{v+=step;if(v>=target){v=target;clearInterval(t);}
+    el.textContent=prefix+v.toFixed(2).replace(/\.00$/,'');},18);
+}
+function renderTable(data){
+  $('tbody').innerHTML=data.map(x=>`<tr class="${x.urgent?'urgent':''}" data-d="${x.d.split(' ')[0]}">
+    <td><b>${x.s}</b><div class="why">${x.w}</div>${x.draft?`<details class="draft"><summary>✉ view full drafted output</summary><div class="draftbox">${x.draft}</div></details>`:''}</td>
+    <td>$${x.c.toFixed(2)}</td>
+    <td><span class="badge ${x.b}">${x.d}</span></td>
+    <td class="rule">${x.r}</td>
+    <td class="why">${x.urgent?'⏰ do today':x.d.startsWith('CANCEL')?'draft ready':x.d==='FLAG'?'1 question':'review later'}</td></tr>`).join('');
+  const counts={ALL:data.length};
+  data.forEach(x=>{const k=x.d.split(' ')[0];counts[k]=(counts[k]||0)+1;});
+  $('chips').innerHTML=Object.entries(counts).map(([k,v],i)=>
+    `<span class="chip ${i===0?'on':''}" data-f="${k}">${k} (${v})</span>`).join('');
+  document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));c.classList.add('on');
+    document.querySelectorAll('#tbody tr').forEach(tr=>
+      tr.classList.toggle('hidden',c.dataset.f!=='ALL'&&tr.dataset.d!==c.dataset.f));
+  });
+}
+function showStats(total,save,count){
+  $('stats').classList.add('show');
+  countUp($('stTotal'),total,'$');countUp($('stSave'),save,'$');
+  countUp($('stYear'),save*12,'$');countUp($('stCount'),count,'');
+}
+
+/* ---------------- demo ---------------- */
+$('demoBtn').onclick=()=>{
+  loadSample();$('results').style.display='none';$('mdout').style.display='none';
+  status.className='status';status.textContent='';
+  logSteps(['Loading identity.md + rules.md','Normalizing prices to $/mo (rule 0b)',
+    'Checking protected list (Section 1)','Renewal urgency scan (Section 2): 1 urgent found',
+    'Usage + overlap pass (Sections 3-4)','Price-creep check (Section 6): NYT +112%',
+    'Drafting cancellation actions'],()=>{
+    $('demotag').style.display='inline-block';$('demonote').style.display='block';
+    renderTable(DEMO);$('weekbox').innerHTML=WEEK;
+    $('results').style.display='block';
+    showStats(DEMO_TOTAL,DEMO_SAVE,DEMO.length);
+    log.style.display='none';
+  });
+};
+
+/* ---------------- live BYOK ---------------- */
+const FILES=["identity.md","rules.md","examples.md","reference/input-template.md","reference/cancellation-templates.md"];
+async function buildPrompt(mode){
+  const subs=serialize();
+  if(!subs)throw new Error('Add at least one subscription (or click Load sample data).');
+  let docs='';
+  for(const f of FILES){
+    let r;
+    try{ r=await fetch('../'+f); }
+    catch(e){ throw new Error('Could not load the operator files. If your address bar starts with file://, that\'s why - browsers block it. From the subscription-auditor folder run: python3 -m http.server 8000  then open http://localhost:8000/interface/'); }
+    if(!r.ok)throw new Error('Could not load ../'+f+' (HTTP '+r.status+') - make sure the WHOLE subscription-auditor folder is being served, not just interface/.');
+    docs+=`\n\n===== FILE: ${f} =====\n`+await r.text();
+  }
+  const base='You are the operator defined by the files below. Follow identity.md and apply rules.md IN ORDER, citing rule numbers. Decide - do not ask questions; use Section 0 assumptions for missing data and mark them. ';
+  let ask='Produce the audit report exactly per reference/cancellation-templates.md Section D.';
+  if(mode==='json'){
+    const rs=await fetch('../reference/report-schema.md');           // schema is canonical in md, like everything else
+    if(rs.ok)docs+=`\n\n===== FILE: reference/report-schema.md =====\n`+await rs.text();
+    ask='Output the audit exactly per reference/report-schema.md (raw JSON only).';
+  }
+  return base+ask
+    +docs+'\n\n===== MY SUBSCRIPTIONS =====\n'+subs+'\n\nRun the full audit now.';
+}
+$('apiKey').value=localStorage.getItem('aud_key')||'';
+$('liveBtn').onclick=async()=>{
+  const btn=$('liveBtn');
+  try{
+    const key=$('apiKey').value.trim();
+    if(!key.startsWith('sk-ant-')){
+      $('keybox').open=true;
+      throw new Error('Paste your Anthropic API key first (sk-ant-...).');
+    }
+    localStorage.setItem('aud_key',key);
+    btn.disabled=true;$('results').style.display='none';$('mdout').style.display='none';
+    status.className='status';status.textContent='Loading operator files…';
+    const prompt=await buildPrompt('json');
+    const t0=Date.now();
+    const tick=setInterval(()=>{status.textContent=
+      `Claude is auditing… ${Math.round((Date.now()-t0)/1000)}s elapsed (a full audit typically takes 30-90s — the report appears here when done)`;},1000);
+    const ctrl=new AbortController();
+    const kill=setTimeout(()=>ctrl.abort(),150000);   // 2.5 min hard timeout
+    let r;
+    try{
+      r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+        signal:ctrl.signal,
+        headers:{'x-api-key':key,'anthropic-version':'2023-06-01',
+          'anthropic-dangerous-direct-browser-access':'true','content-type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:4096,
+          messages:[{role:'user',content:prompt}]})});
+    }catch(e){
+      clearInterval(tick);clearTimeout(kill);
+      if(e.name==='AbortError')throw new Error('Timed out after 2.5 minutes - Anthropic may be slow right now. Try again, or use 📋 Copy prompt for Claude → paste into claude.ai.');
+      throw new Error('The call to api.anthropic.com was blocked before reaching Anthropic. Usual causes: an ad/privacy blocker, a strict browser (try Chrome), or no internet. Fallback that always works: 📋 Copy prompt for Claude → paste into claude.ai.');
+    }
+    clearInterval(tick);clearTimeout(kill);
+    const d=await r.json();
+    if(d.error)throw new Error(d.error.message||JSON.stringify(d.error));
+    let raw=d.content.map(b=>b.text||'').join('').replace(/—/g,'-').replace(/–/g,'-').trim()
+      .replace(/^```(json)?/,'').replace(/```$/,'').trim();
+    let rep=null; try{ rep=JSON.parse(raw); }catch(e){}
+    if(rep&&rep.items){
+      // same renderer as the demo - one pipeline, two sources
+      const mapped=rep.items.map(x=>({s:x.name,c:+x.per_mo||0,d:x.decision,
+        b:x.decision.startsWith('CANCEL')?'b-cancel':x.decision==='KEEP'?'b-keep':x.decision==='FLAG'?'b-flag':'b-down',
+        r:x.rule,w:x.why,urgent:!!x.urgent,draft:x.draft||null}));
+      renderTable(mapped);
+      $('weekbox').innerHTML='<h4>Execute this week</h4>'+
+        (rep.execute_this_week||[]).map((s,i)=>`${i+1}. ${s}`).join('<br>');
+      $('demotag').style.display='none';$('demonote').style.display='none';
+      $('results').style.display='block';
+      showStats(+rep.summary.total_mo||0,+rep.summary.savings_mo||0,mapped.length);
+    }else{
+      // fallback: render whatever came back as markdown
+      let html=marked.parse(raw).replace(/\b(CANCEL AT RENEWAL|CANCEL|DOWNGRADE|KEEP|FLAG)\b/g,m=>{
+        const cls=m.startsWith('CANCEL')?'b-cancel':m==='KEEP'?'b-keep':m==='FLAG'?'b-flag':'b-down';
+        return `<span class="badge ${cls}">${m}</span>`;});
+      $('mdout').innerHTML=html;$('mdout').style.display='block';
+    }
+    log.style.display='none';status.textContent='Live audit complete.';
+  }catch(e){log.style.display='none';status.className='status err';status.textContent=e.message;}
+  btn.disabled=false;
+};
+
+/* ---------------- copy prompt ---------------- */
+$('copyBtn').onclick=async()=>{
+  try{
+    const p=await buildPrompt();
+    await navigator.clipboard.writeText(p);
+    status.className='status';
+    status.textContent=`Prompt copied (${p.length.toLocaleString()} chars) - paste into any Claude chat.`;
+  }catch(e){status.className='status err';status.textContent=e.message;}
+};
+</script>
+</body>
+</html>
