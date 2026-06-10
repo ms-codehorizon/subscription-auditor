@@ -1,7 +1,7 @@
 [project]
 name = "subscription-auditor"
 version = "0.1.0"
-description = "Add your description here"
+description = "An AI operator whose brain is auditable markdown"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
