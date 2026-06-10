@@ -42,8 +42,8 @@ Click **▶ Watch demo audit** - a recorded run over 10 subscriptions with
 four edge cases buried in them.
 
 **Live, your key:** same page, **🔑 Run live audit**. Your key stays in
-your browser's localStorage and is sent only to `api.anthropic.com` -
-this page has no server.
+this browser tab only (sessionStorage, cleared on close) and is sent
+only to `api.anthropic.com` - this page has no server.
 
 **No key at all:** **📋 Copy prompt for any LLM** assembles the full
 operator prompt; paste it into Claude, ChatGPT, Gemini, or any capable
@@ -103,8 +103,13 @@ and ambiguity is illegal - even ties have a written tiebreaker.
 ## Security model
 
 - No key ever ships in this repo (`.gitignore` blocks `.env`)
-- BYOK mode: key lives in the visitor's browser only, direct to Anthropic
-- Flask mode: key read from local `.env`, never logged
+- BYOK mode: key lives in `sessionStorage` only (cleared when the tab
+  closes), sent only to `api.anthropic.com`. Use a key with a spend limit.
+- All dynamic content (user input and LLM output) is HTML-escaped before
+  rendering; a meta CSP restricts network targets to api.anthropic.com
+- Zero third-party scripts - the page has no CDN dependencies
+- Flask mode: key read from local `.env`, never logged; localhost only -
+  don't expose port 5050 to your network
 - `history.json` (personal audit data) is gitignored
 
 ## Edge cases it handles (not hand-waves)
