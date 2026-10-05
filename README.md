@@ -27,9 +27,9 @@ duplication:
 
 Edit one rule in `rules.md` and all three interfaces change behavior
 instantly. Every decision in every interface cites its rule number, so you
-can audit the auditor. The git history shows the correction loop: rules
-that exist because a test run exposed a gap (see `rules.md` Section 0 and Section 4d -
-both born from a failed audit, not a brainstorm).
+can audit the auditor. Some rules exist because a test run exposed a gap:
+see `rules.md` Section 0 and Section 4d, both added after a failed audit,
+not a brainstorm.
 
 This is [Interpretable Context Methodology](https://github.com/RinDig/Interpreted-Context-Methdology):
 folder structure as agent architecture.
